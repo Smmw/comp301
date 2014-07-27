@@ -42,6 +42,7 @@ static void prompt(void) {
   printf(" $ ");
 }
 
+
 /**
  * Remove leading spaces from a string.
  * @param str The string to remove spaces from
@@ -49,18 +50,18 @@ static void prompt(void) {
  */
 static char *trim(char *str) {
   char *ret = str;
+
+  /* Ignore NULL input */
+  if (ret == NULL)
+    return NULL;
+
   while (isspace(*ret))
     ret++;
 
   return ret;
 }
 
-/**
- * Program entry point.
- * @param argc The number of arguments passed (unused)
- * @param argv Array of arguments passed delimeted by space (unused)
- * @returns EXIT_SUCCESS
- */
+
 int main(int argc, char **argv) {
   /* Input buffer */
   char buf[10000];
@@ -76,8 +77,12 @@ int main(int argc, char **argv) {
   while (1) {
     /* Get a line from stdin */
     fgets(buf, 10000, stdin);
+    if (ferror(stdin)) {
+      fprintf(stderr, "Error reading from stdin.\n");
+      return EXIT_FAILURE;
+    }
 
-    /* Catch the Ctrl+D signal */
+    /* Catch Ctrl+D on empty lines */
     if (feof(stdin))
       return EXIT_SUCCESS;
 
@@ -112,11 +117,22 @@ int main(int argc, char **argv) {
       else {
 	/* Create the child process, opening a pipe to read from */
 	child = popen((const char *)command, "r");
+	if (child == NULL) {
+	  fprintf(stderr, "Failed to create child process.\n");
+	  fprintf(stderr, "Error number (%d)\n", errno);
+	  return EXIT_FAILURE;
+	}
 
         /* Until the child is done, display all characters set to the
 	 * pipe. */
 	while ((c = fgetc(child)) != EOF)
 	  printf("%c", c);
+
+	/* Check for errors */
+	if (ferror(child)) {
+	  fprintf(stderr, "Child terminated with errors.");
+	  fprintf(stderr, "Error number (%d)\n", ferror(child));
+	}
 
 	/* Close the child process pipe */
 	pclose(child);
