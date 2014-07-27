@@ -1,0 +1,22 @@
+Dan Shell
+A very simple shell with less features than sh!
+
+To build, simply run 'build.sh':
+  ./build.sh
+
+To run:
+  ./dsh
+
+The shell's prompt includes your username (if $USER is defined),
+the hostname of the machine you're on and also the current working
+directory.
+
+You can use any command that doesn't require stdin (as that pipe
+hasn't been passed).  There are two special commands; exit and
+welcome.
+
+exit
+  Exits the shell
+
+welcome <name>
+  Greets you with "Hello, <name>!"
