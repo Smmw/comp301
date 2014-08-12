@@ -1,0 +1,21 @@
+Simple Sheduler
+===
+This project covers the design and implementation of a really basic scheduler.
+The current time for the scheduler is externally defined.
+
+The program accepts an instruction file which makes use
+of the following instructions:
+
+* TIME - Sets the current time.
+* ADD - Adds a task to occur at a certain time
+* ADDREP - Adds a task that will be repeated at a certain rate
+* DEL - Removes all instances of a task from the scheduler
+* LIST - Lists the schedule in chronological order
+* CLEAR - Clears the schedule
+
+Running
+---
+To build and run the scheduler, just run the following commands.
+An example input file is provided (example.in)
+    make
+    output/scheduler <inputfile>

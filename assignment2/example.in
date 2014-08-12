@@ -1,0 +1,34 @@
+TIME 0
+ADDREP 40 60 orko
+ADD 20 skeletor
+LIST
+TIME 10
+TIME 20
+ADD 100 he-man
+TIME 30
+ADD 40 teela
+TIME 40
+LIST
+ADD 140 beastman
+ADD 130 manatarms
+TIME 80
+DEL teela
+TIME 120
+DEL beastman
+ADD 190 skeletor
+TIME 150
+ADDREP 200 40 fisto
+TIME 175
+LIST
+DEL orko
+TIME 180
+ADDREP 250 100 evil-lyn
+LIST
+TIME 200
+TIME 220
+ADD 280 skeletor
+TIME 260 
+LIST
+CLEAR
+ADD 350 ramman
+LIST

@@ -1,5 +1,9 @@
 # Backup Files
 *~
 
+# Build files
+*/build/*
+*/output/*
+
 # Assignment submissions
 *.tar.gz
