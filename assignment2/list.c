@@ -119,6 +119,7 @@ void list_insert(list_t *list, void *data, compare_t compare) {
 
 void list_remove(list_t *list, void *data, compare_t compare) {
   list_el_t *tmp;
+  int l1 = list->length;
 
   /* If the list is empty, then there is nothing to do */
   if (list->head == NULL)
@@ -164,4 +165,37 @@ void list_clear(list_t *list) {
   list->head = NULL;
   list->tail = NULL;
   list->length = 0;
+}
+
+void * list_find_first(list_t *list, void *data, compare_t compare) {
+  list_el_t *tmp;
+  tmp = NULL;
+  return list_find_next(list, data, &tmp, compare);
+}
+
+void * list_find_next(list_t *list, void *data, list_el_t **reference,
+		      compare_t compare) {
+  list_el_t *tmp;
+
+  /* Point to the start of the list, or where we left off */
+  if (*reference == NULL) {
+    tmp = list->head;
+  } else {
+    tmp = *reference;
+  }
+
+  /* Scan the list from reference to the end to find the next
+   * occurance */
+  while (tmp != NULL) {
+    if (compare(data, tmp->data) == 0) {
+      *reference = tmp->next;
+      return tmp->data;
+    }
+
+    tmp = tmp->next;
+  }
+
+  /* Item wasn't found in list */
+  *reference = NULL;
+  return NULL;
 }

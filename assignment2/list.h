@@ -30,8 +30,8 @@ typedef struct list_s {
  * Compare function used to compare items in the list.
  * @param d1 The first item's data
  * @param d2 The second item's data
- * @return -1 if the d1 is smaller, 0 if the d1 is the same
- *           and 1 if the d1 is larger than d2
+ * @returns -1 if the d1 is smaller, 0 if the d1 is the same
+ *          and 1 if the d1 is larger than d2
  */ 
 typedef int (*compare_t)(void *d1, void *d2);
 
@@ -70,3 +70,25 @@ void list_remove(list_t *list, void *data, compare_t compare);
  */
 void list_clear(list_t *list);
 
+/**
+ * Search for the first instance of the given item within the list
+ * @param list A pointer to the list structure
+ * @param data A pointer to the data to search for
+ * @param compare The compare function to use
+ * @returns The first instance of the object if found, otherwise NULL
+ */
+void * list_find_first(list_t *list, void *data, compare_t compare);
+
+/**
+ * Search for the next occurance of the given item within the list
+ * @param list A pointer to the list structure
+ * @param data A pointer to the data to search for
+ * @param reference This pointer will keep track of the position in
+ *                  the list. It is important to pass this pointer
+ *                  at each call to list_find_next. Initialise to NULL
+ *                  for the first call.
+ * @param compare The compare function to use
+ * @returns The next instance of the object if found, otherwise NULL
+ */
+void * list_find_next(list_t *list, void *data, list_el_t **reference,
+		      compare_t compare);

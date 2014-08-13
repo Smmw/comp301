@@ -99,13 +99,58 @@ int job_compare_name(void *d1, void *d2) {
   return strncmp(j1->name, j2->name, MAX_NAME);
 }
 
+int job_find_expired(void *d1, void *d2) {
+  unsigned int time;
+  job_t *job;
+
+  time = *(unsigned int *)d1;
+  job = (job_t *)d2;
+
+  if (time >= job->time)
+    return 0;
+
+  return -1;
+}
+
 /*
  * Instructions
  */
+int i_compare_name(void *d1, void *d2) {
+  instruction_t *i1, *i2;
+
+  i1 = (instruction_t *)d1;
+  i2 = (instruction_t *)d2;
+
+  return strncmp(i1->name, i2->name, MAX_INSTRUCTION);
+}
+
 static void i_time(char *params) {
+  job_t *job;
+  list_el_t *tmp;
+
   current_time = (unsigned int)atoi(params);
+  printf("Setting current time to %d\n", current_time);
+
+  tmp = NULL;
 
   /* Scan the schedule to see if any jobs need to be processed */
+  job = list_find_next(schedule, &current_time, &tmp,
+		       job_find_expired);
+  while (job != NULL) {
+    printf("%d %s\n", job->time, job->name);
+    list_remove(schedule, job, job_compare_name);
+
+    /* Add the job back if it repeats */
+    if (job->repeat) {
+      job->time += job->repeat;
+      list_insert(schedule, job, job_compare_time);
+    } else {
+      free(job);
+    }
+
+    job = list_find_next(schedule, &current_time, &tmp,
+		       job_find_expired);
+  }
 }
 
 static void i_add(char *params) {
@@ -119,8 +164,6 @@ static void i_add(char *params) {
 
   /* Job */
   tmp = strtok(NULL, " ");
-
-  printf("adding %s at %d\n", tmp, time);
   
   /* Create a job structure */
   job = malloc(sizeof(job_t));
@@ -133,6 +176,8 @@ static void i_add(char *params) {
   strncpy(job->name, tmp, MAX_NAME);
   job->time = time;
   job->repeat = 0;
+
+  printf("Adding %s at %d\n", job->name, job->time);
 
   /* Add job to the schedule */
   list_insert(schedule, (void *)job, job_compare_time);
@@ -154,8 +199,6 @@ static void i_addrep(char *params) {
   /* Job */
   tmp = strtok(NULL, " ");
 
-  printf("adding %s at %d repeating every %d\n", tmp, time, repeat);
-
   /* Create a job structure */
   job = malloc(sizeof(job_t));
   if (job == NULL) {
@@ -167,6 +210,9 @@ static void i_addrep(char *params) {
   strncpy(job->name, tmp, MAX_NAME);
   job->time = time;
   job->repeat = repeat;
+
+  printf("Adding %s at %d every %d\n", job->name, job->time,
+	 job->repeat);
 
   /* Add job to the schedule */
   list_insert(schedule, (void *)job, job_compare_time);
@@ -182,8 +228,9 @@ static void i_del(char *params) {
   }
 
   strncpy(job->name, params, MAX_NAME);
+
+  printf("Removing %s from the schedule.\n", job->name);
   
-  printf("Removing %s from the schedule\n", params);
   list_remove(schedule, (void *)job, job_compare_name);
 }
 
@@ -191,21 +238,36 @@ static void i_list(char *params) {
   list_el_t *tmp;
   job_t *job;
 
-  printf("---- SCHEDULE -----\n");
+  printf("Upcoming tasks:\n");
 
   tmp = schedule->head;
   while(tmp != NULL) {
     job = (job_t *)tmp->data;
-    printf("%s: %d (%d)\n", job->name, job->time,
-	   job->repeat);
+    printf("  %s %d", job->name, job->time);
+
+    if (job->repeat)
+      printf(" (%d)", job->repeat);
+
+    printf("\n");
+
     tmp = tmp->next;
   }
-
-  printf("--------------------\n");
 }
 
 static void i_clear(char *params) {
-  printf("clear\n");
+  list_el_t *tmp;
+
+  printf("Clearing schedule\n");
+  
+  /* Move through the list freeing all memory stored within the list */
+  tmp = schedule->head;
+  while (tmp != NULL) {
+    free(tmp->data);
+    tmp = tmp->next;
+  }
+
+  /* Clear the list itself */
+  list_clear(schedule);
 }
 
 void add_instruction(list_t *list, char *name,
@@ -237,22 +299,19 @@ void build_instructions(list_t *list) {
 
 void process_instruction(list_t *instructions, char *inst,
 			 char *params) {
-  list_el_t *tmp;
-  instruction_t *instruction;
+  instruction_t *instruction, tmp;
 
-  /* Scan the list until the desired instruction is found */
-  tmp = instructions->head;
-  while (tmp != NULL) {
-    instruction = (instruction_t *)tmp->data;
-    if (strncmp(instruction->name, inst, MAX_INSTRUCTION) == 0) {
-      instruction->func(params);
-      return;
-    }
+  tmp.name = inst;
 
-    tmp = tmp->next;
+  /* Find the instruction to execute */
+  instruction = list_find_first(instructions, &tmp, i_compare_name);
+  if (instruction == NULL) {
+    fprintf(stderr, "Failed to find instruction %s.\n", inst);
+    return;
   }
 
-  fprintf(stderr, "Invalid instruction: %s\n", inst);
+  /* Execute the instruction function with the given parameters */
+  instruction->func(params);
 }
 
 /*
