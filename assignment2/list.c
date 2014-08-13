@@ -11,12 +11,6 @@
 
 #include "list.h"
 
-/**
- * Create a new list
- *
- * @returns A valid memory address if a list was created, otherwise
- *          NULL.
- */
 list_t * list_init(void) {
   list_t *list;
 
@@ -33,6 +27,37 @@ list_t * list_init(void) {
   list->length = 0;
 
   return list;
+}
+
+void list_add(list_t *list, void *data) {
+  list_el_t *tmp, *item;
+
+  /* Create an item to insert into the list */
+  item = malloc(sizeof(list_el_t));
+  if (item == NULL) {
+    fprintf(stderr, "Failed to allocate memory for list item.\n");
+    return;
+  }
+  item->next = NULL;
+  item->prev = NULL;
+  item->data = data;
+
+  /* If the list is empty, new item becomes the head and tail of
+   * the list. */
+  if (list->head == NULL) {
+    list->head = item;
+    list->tail = item;
+    list->length++;
+
+    return;
+  }
+
+  /* Insert the item as the head of the list */
+  tmp = list->head;
+  list->head = item;
+  item->next = tmp;
+  tmp->prev = item;
+  list->length++;
 }
 
 void list_insert(list_t *list, void *data, compare_t compare) {
@@ -95,21 +120,15 @@ void list_insert(list_t *list, void *data, compare_t compare) {
 void list_remove(list_t *list, void *data, compare_t compare) {
   list_el_t *tmp;
 
-  printf("Removing %s\n", (char *)data);
-
   /* If the list is empty, then there is nothing to do */
-  if (list->head == NULL) {
-    printf(" list is empty\n");
+  if (list->head == NULL)
     return;
-  }
 
   /* Starting at the top of the list, remove all instances of the
    * data from the list */
   tmp = list->head;
   while(tmp != NULL) {
     if (compare(data, tmp->data) == 0) {
-      printf(" found item\n");
-
       if (tmp == list->head) {
 	list->head = tmp->next;
 	tmp->next->prev = NULL;

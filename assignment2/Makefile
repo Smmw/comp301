@@ -8,7 +8,7 @@ SRCS_C = \
 
 SRCS_H =
 
-CFLAGS=-Os
+CFLAGS=-Os -g
 
 OBJS = $(addprefix build/, $(SRCS_C:.c=.o))
 

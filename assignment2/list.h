@@ -42,6 +42,13 @@ typedef int (*compare_t)(void *d1, void *d2);
 list_t * list_init(void);
 
 /**
+ * Add an item to the head of the list
+ * @param list A pointer to the list structure
+ * @param data A pointer to the data to add
+ */
+void list_add(list_t *list, void *data);
+
+/**
  * Insert an item into the list
  * @param list A pointer to the list structure
  * @param data A pointer to the data to insert
