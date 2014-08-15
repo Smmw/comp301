@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 
@@ -49,15 +50,15 @@ typedef struct job_s {
   /* job name */
   char name[MAX_NAME];
   /* time until job runs */
-  unsigned int time;
+  uint32_t time;
   /* time between executions */
-  unsigned int repeat;
+  uint32_t repeat;
 } job_t;
 
 /*
  * Global variables
  */
-static unsigned int current_time;
+static uint32_t current_time;
 static list_t *schedule;
 
 void usage(void) {
@@ -100,10 +101,10 @@ int job_compare_name(void *d1, void *d2) {
 }
 
 int job_find_expired(void *d1, void *d2) {
-  unsigned int time;
+  uint32_t time;
   job_t *job;
 
-  time = *(unsigned int *)d1;
+  time = *(uint32_t *)d1;
   job = (job_t *)d2;
 
   if (time >= job->time)
@@ -129,7 +130,6 @@ static void i_time(char *params) {
   list_el_t *tmp;
 
   current_time = (unsigned int)atoi(params);
-  printf("Setting current time to %d\n", current_time);
 
   tmp = NULL;
 
@@ -155,12 +155,16 @@ static void i_time(char *params) {
 
 static void i_add(char *params) {
   char *tmp;
-  unsigned int time;
+  uint32_t time;
   job_t *job;
 
   /* Time */
   tmp = strtok(params, " ");
-  time = (unsigned int)atoi(tmp);
+  time = (uint32_t)atoi(tmp);
+
+  /* Just ignore times that have passed */
+  if (time <= current_time)
+    return;
 
   /* Job */
   tmp = strtok(NULL, " ");
@@ -177,24 +181,26 @@ static void i_add(char *params) {
   job->time = time;
   job->repeat = 0;
 
-  printf("Adding %s at %d\n", job->name, job->time);
-
   /* Add job to the schedule */
   list_insert(schedule, (void *)job, job_compare_time);
 }
 
 static void i_addrep(char *params) {
   char *tmp;
-  unsigned int time, repeat;
+  uin32_t time, repeat;
   job_t *job;
 
   /* Time */
   tmp = strtok(params, " ");
-  time = (unsigned int)atoi(tmp);
+  time = (uin32_t)atoi(tmp);
 
   /* Repeat */
   tmp = strtok(NULL, " ");
-  repeat = (unsigned int)atoi(tmp);
+  repeat = (uint32_t)atoi(tmp);
+
+  /* Skip the next occurance to after the current time */
+  while (time <= current_time)
+    time += repeat;
 
   /* Job */
   tmp = strtok(NULL, " ");
@@ -211,9 +217,6 @@ static void i_addrep(char *params) {
   job->time = time;
   job->repeat = repeat;
 
-  printf("Adding %s at %d every %d\n", job->name, job->time,
-	 job->repeat);
-
   /* Add job to the schedule */
   list_insert(schedule, (void *)job, job_compare_time);
 }
@@ -228,8 +231,6 @@ static void i_del(char *params) {
   }
 
   strncpy(job->name, params, MAX_NAME);
-
-  printf("Removing %s from the schedule.\n", job->name);
   
   list_remove(schedule, (void *)job, job_compare_name);
 }
@@ -243,12 +244,7 @@ static void i_list(char *params) {
   tmp = schedule->head;
   while(tmp != NULL) {
     job = (job_t *)tmp->data;
-    printf("  %s %d", job->name, job->time);
-
-    if (job->repeat)
-      printf(" (%d)", job->repeat);
-
-    printf("\n");
+    printf("%s %d\n", job->name, job->time);
 
     tmp = tmp->next;
   }
@@ -256,8 +252,6 @@ static void i_list(char *params) {
 
 static void i_clear(char *params) {
   list_el_t *tmp;
-
-  printf("Clearing schedule\n");
   
   /* Move through the list freeing all memory stored within the list */
   tmp = schedule->head;
@@ -320,7 +314,6 @@ void process_instruction(list_t *instructions, char *inst,
 int main(int argc, char **argv) {
   FILE *infile = NULL;
   char line[MAX_LINE];
-  unsigned int time = 0;
   list_t *instructions;
   char *inst, *params, *tmp;
 
