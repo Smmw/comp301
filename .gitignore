@@ -4,6 +4,9 @@
 # Build files
 */build/*
 */output/*
+*.o
+*.elf
+*.img
 
 # Assignment submissions
 *.tar.gz
