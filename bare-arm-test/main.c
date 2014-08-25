@@ -9,6 +9,7 @@
  * Dan Collins 2014
  * COMP301-14B
  */
+#include <stdlib.h>
 
 #define GPIO_BASE 0x20200000
 
@@ -21,16 +22,31 @@ volatile unsigned int timer;
 
 void kernel_main(unsigned int r0, unsigned int r1,
 		 unsigned int atags) {
-  /* Set the LED pin as an output */
+  unsigned int i;
+  unsigned int *ctr;
+
+  /* Set the LED pin as an output and turn it off */
   gpio[GPIO_GPFSEL1] |= (1 << 18);
+  gpio[GPIO_GPSET0] = (1 << 16);
+
+  /* Allocate memory for the counters */
+  ctr = (unsigned int *)malloc(2 * sizeof(unsigned int));
+  if (ctr == NULL) {
+    while(1)
+      ;
+  }
+
+  /* Zero the counters */
+  for (i = 0; i < 2; i++)
+    ctr[i] = 0;
 
   while(1) {
-    for (timer = 0; timer < 500000; timer++)
+    for (ctr[0] = 0; ctr[0] < 500000; ctr[0]++)
       ;
 
     gpio[GPIO_GPCLR0] = (1 << 16);
 
-    for (timer = 0; timer < 500000; timer++)
+    for (ctr[1] = 0; ctr[1] < 500000; ctr[1]++)
       ;
 
     gpio[GPIO_GPSET0] = (1 << 16);

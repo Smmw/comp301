@@ -1,9 +1,10 @@
 // This was copied from:
 // http://www.valvers.com/embedded-linux/raspberry-pi/step02-bare-metal-programming-in-c-pt2
 
-.section ".tex.startup"
+.section ".text.startup"
 
 .global _start
+.global _get_stack_pointer
 
 _start:
 	// Set stack pointer to the bottom of RAM
