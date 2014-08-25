@@ -25,12 +25,12 @@ void kernel_main(unsigned int r0, unsigned int r1,
   gpio[GPIO_GPFSEL1] |= (1 << 18);
 
   while(1) {
-    for (timer = 0; timer < 5000000; timer++)
+    for (timer = 0; timer < 500000; timer++)
       ;
 
     gpio[GPIO_GPCLR0] = (1 << 16);
 
-    for (timer = 0; timer < 5000000; timer++)
+    for (timer = 0; timer < 500000; timer++)
       ;
 
     gpio[GPIO_GPSET0] = (1 << 16);
