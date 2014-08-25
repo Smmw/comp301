@@ -187,12 +187,12 @@ static void i_add(char *params) {
 
 static void i_addrep(char *params) {
   char *tmp;
-  uin32_t time, repeat;
+  uint32_t time, repeat;
   job_t *job;
 
   /* Time */
   tmp = strtok(params, " ");
-  time = (uin32_t)atoi(tmp);
+  time = (uint32_t)atoi(tmp);
 
   /* Repeat */
   tmp = strtok(NULL, " ");
