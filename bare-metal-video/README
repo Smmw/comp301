@@ -1,0 +1,8 @@
+Raspberry Pi
+---
+
+A simple demo showing access to the VideoCore within the raspberry pi.
+This is based on the Cambridge University tutorials found at:
+http://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/
+The end goal is to have a terminal displaying on a screen (using HDMI) much like when Linux is running on the RPi.
+A blinky LED is always a good way to show things are still working, so a blinky LED will also feature.
