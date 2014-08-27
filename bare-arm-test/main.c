@@ -19,6 +19,8 @@
 
 #define RPI_SYSTIMER_BASE 0x20003000
 
+#define UART0_BASE 0x101f1000
+
 typedef struct {
   volatile uint32_t control_status;
   volatile uint32_t counter_lo;
@@ -30,9 +32,11 @@ typedef struct {
 } rpi_sys_timer_t;
 
 volatile unsigned int *gpio = (unsigned int *)GPIO_BASE;
+volatile unsigned int *uart = (unsigned int *)UART0_BASE;
 static rpi_sys_timer_t* rpiSystemTimer = (rpi_sys_timer_t*)RPI_SYSTIMER_BASE;
 
 void delay_us(uint32_t us);
+void uart0_write(char *s);
 
 void kernel_main(unsigned int r0, unsigned int r1,
 		 unsigned int atags) {
@@ -40,10 +44,14 @@ void kernel_main(unsigned int r0, unsigned int r1,
   gpio[GPIO_GPFSEL1] |= (1 << 18);
   gpio[GPIO_GPSET0] = (1 << 16);
 
+  uart0_write("Hello, world!\n");
+
   while(1) {
     gpio[GPIO_GPCLR0] = (1 << 16);
+    uart0_write("On.\n");
     delay_us(500000);
     gpio[GPIO_GPSET0] = (1 << 16);
+    uart0_write("Off.\n");
     delay_us(500000);
   }
 }
@@ -53,6 +61,13 @@ void delay_us(uint32_t us) {
 
   while ((rpiSystemTimer->counter_lo - ts) < us)
     ;
+}
+
+void uart0_write(char *s) {
+  while (*s != '\n') {
+    *uart = (unsigned int)*s;
+    s++;
+  }
 }
 
 void exit(int code) {
