@@ -7,7 +7,8 @@ SRCS_C = \
 	cstubs.c \
 	cstartup.c \
 	rpi_gpio.c \
-	rpi_systemtimer.c
+	rpi_systemtimer.c \
+	rpi_muart.c
 
 # Project Assembly sources
 SRCS_S = \
@@ -16,7 +17,8 @@ SRCS_S = \
 # Project headers
 SRCS_H = \
 	rpi_gpio.h \
-	rpi_systemtimer.h
+	rpi_systemtimer.h \
+	rpi_muart.h
 
 # List of object files we need to make
 OBJS = $(addprefix build/, $(SRCS_C:.c=.o))
