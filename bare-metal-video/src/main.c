@@ -14,7 +14,7 @@
 
 #include "rpi_gpio.h"
 #include "rpi_systemtimer.h"
-#include "rpi_muart.h"
+#include "rpi_uart.h"
 
 void kernel_main(unsigned int r0, unsigned int r1,
 		 unsigned int atags) {
@@ -31,12 +31,12 @@ void kernel_main(unsigned int r0, unsigned int r1,
 #endif
 
   /* Set the LED pin as an output and turn it off */
-  rpi_gpio[RPI_GPIO_GPFSEL1] |= (1 << 18);
-  rpi_gpio[RPI_GPIO_GPSET0] = (1 << 16);
+  RPI_GPIO->GPFSEL1 |= (1 << 18);
+  RPI_GPIO->GPSET0 = (1 << 16);
 
-  /* Set up mini uart */
-  rpi_muart_init();
-  rpi_muart_puts("Hello, world!\n");
+  /* Set up uart */
+  rpi_uart_init();
+  rpi_uart_puts("Hello, world!\n");
 
 #if 0
   /* Ask the GPU for a frame buffer */
@@ -48,10 +48,10 @@ void kernel_main(unsigned int r0, unsigned int r1,
 #endif
 
   while(1) {
-    rpi_gpio[RPI_GPIO_GPCLR0] = (1 << 16);
+    RPI_GPIO->GPCLR0 = (1 << 16);
     rpi_systemtimer_blocking_delay_us(500000);
 
-    rpi_gpio[RPI_GPIO_GPSET0] = (1 << 16);
+    RPI_GPIO->GPSET0 = (1 << 16);
     rpi_systemtimer_blocking_delay_us(500000);
   }
 }

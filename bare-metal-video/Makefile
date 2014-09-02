@@ -6,9 +6,8 @@ SRCS_C = \
 	main.c \
 	cstubs.c \
 	cstartup.c \
-	rpi_gpio.c \
 	rpi_systemtimer.c \
-	rpi_muart.c
+	rpi_uart.c
 
 # Project Assembly sources
 SRCS_S = \
