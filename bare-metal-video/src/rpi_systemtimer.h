@@ -10,7 +10,8 @@
 
 #include <stdint.h>
 
-#define RPI_SYSTEMTIMER_BASE 0x20003000
+#define RPI_SYSTEMTIMER_BASE 0x20003000UL
+#define RPI_SYSTEMTIMER ((rpi_systemtimer_t *)RPI_SYSTEMTIMER_BASE)
 
 typedef struct {
   volatile uint32_t control_status;
@@ -21,8 +22,6 @@ typedef struct {
   volatile uint32_t compare2;
   volatile uint32_t compare3;
 } rpi_systemtimer_t;
-
-extern volatile rpi_systemtimer_t *rpi_systemtimer;
 
 void rpi_systemtimer_blocking_delay_us(uint32_t us);
 

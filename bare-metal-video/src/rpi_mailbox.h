@@ -10,12 +10,18 @@
 
 #include <stdint.h>
 
-#define RPI_MAILBOX_READ           0x2000B880UL
-#define RPI_MAILBOX_POLL           0x2000B890UL
-#define RPI_MAILBOX_SENDER         0x2000B894UL
-#define RPI_MAILBOX_STATUS         0x2000B898UL
-#define RPI_MAILBOX_CONFIGURATION  0x2000B89CUL
-#define RPI_MAILBOX_WRITE          0x2000B8A0UL
+#define RPI_MAILBOX_BASE 0x2000B880UL
+#define RPI_MAILBOX ((rpi_mailbox_t *)RPI_MAILBOX_BASE)
+
+typedef struct {
+  volatile uint32_t read;
+  volatile uint32_t RESERVED0[3];
+  volatile uint32_t poll;
+  volatile uint32_t sender;
+  volatile uint32_t status;
+  volatile uint32_t configuration;
+  volatile uint32_t write;
+} rpi_mailbox_t;
 
 typedef struct {
   /* Physical width and height of display. */
@@ -37,17 +43,10 @@ typedef struct {
    * buffer. These are provided by the GPU. */
   uint32_t gpu_pointer;
   uint32_t gpu_size;
-} __attribute__((__packed__)) rpi_mailbox_framebuffer_t;
+} rpi_mailbox_framebuffer_t;
 
-extern volatile uint32_t *rpi_mailbox_read;
-extern volatile uint32_t *rpi_mailbox_poll;
-extern volatile uint32_t *rpi_mailbox_sender;
-extern volatile uint32_t *rpi_mailbox_status;
-extern volatile uint32_t *rpi_mailbox_configuration;
-extern volatile uint32_t *rpi_mailbox_write;
-
-uint32_t rpi_mailbox_r(uint8_t channel);
-void rpi_mailbox_w(uint8_t channel, uint32_t data);
+uint32_t rpi_mailbox_read(uint8_t channel);
+void rpi_mailbox_write(uint8_t channel, uint32_t data);
 
 /* _RPI_MAILBOX */
 #endif
