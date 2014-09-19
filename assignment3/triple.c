@@ -68,6 +68,28 @@ void translate(char *buf, int len) {
   }
 }
 
+/* Same translation as above, but will copy at the same time */
+void translate_copy(char *dest, char *src, int len) {
+  int i;
+
+  for (i = 0; i < len; i++) {
+    if (src[i] == 'a' || src[i] == 'A')
+      dest[i] = '4';
+
+    if (src[i] == 'e' || src[i] == 'E')
+      dest[i] = '3';
+
+    if (src[i] == 'i' || src[i] == 'I')
+      dest[i] = '1';
+
+    if (src[i] == 'o' || src[i] == 'O')
+      dest[i] = '0';
+
+    if (src[i] == 's' || src[i] == 'S')
+      dest[i] = '5';
+  }
+}
+
 void *translate_thread(void *args) {
   /* While the input thread is running, and there is data in the
    * buffers to translate... */
@@ -76,15 +98,13 @@ void *translate_thread(void *args) {
     if (in_len_a > 0) {
       pthread_mutex_lock(&in_mutex_a);
 
-      /* Translate the data in-place */
-      translate(in_buf_a, in_len_a);
-
       /* We also need to copy into the output buffer, which needs to
        * be available and empty */
       while (out_len_a > 0)
 	;
       pthread_mutex_lock(&out_mutex_a);
-      memcpy(out_buf_a, in_buf_a, in_len_a);
+      /* Translate away */
+      translate_copy(out_buf_a, in_buf_a, in_len_a);
       out_len_a = in_len_a;
       pthread_mutex_unlock(&out_mutex_a);
 
@@ -97,15 +117,12 @@ void *translate_thread(void *args) {
     if (in_len_b > 0) {
       pthread_mutex_lock(&in_mutex_b);
 
-      /* Translate the data in-place */
-      translate(in_buf_a, in_len_a);
-
       /* Wait until there is room for the output data */
       while (out_len_b > 0)
 	;
       pthread_mutex_lock(&out_mutex_b);
       /* Copy the translated data */
-      memcpy(out_buf_b, in_buf_b, in_len_b);
+      translate_copy(out_buf_b, in_buf_b, in_len_b);
       out_len_b = in_len_b;
       pthread_mutex_unlock(&out_mutex_b);
 
